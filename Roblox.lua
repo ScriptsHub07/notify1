@@ -8,7 +8,7 @@ local WEBHOOK_URL = "https://discord.com/api/webhooks/1418388829160607778/tLZjaL
 local SPECIAL_WEBHOOK_URL = "https://discord.com/api/webhooks/1418386817820004403/-E0obGTbnxTFAfNTY_M06Ds05e1QEbQWtn3ROym1DETpE_Seo4sKnv--su-6oneCGaEu"
 
 -- ===== CONFIGURAÇÃO DE TROCA DE SERVIDOR =====
-local SERVER_SWITCH_INTERVAL = 45 -- segundos
+local SERVER_SWITCH_INTERVAL = 3 -- segundos
 local PLACE_ID = game.PlaceId -- ID do jogo atual
 
 -- ========= FORMATAÇÃO =========
