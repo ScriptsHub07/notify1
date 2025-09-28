@@ -3,15 +3,12 @@ local Workspace = game:GetService("Workspace")
 local HttpService = game:GetService("HttpService")
 local TeleportService = game:GetService("TeleportService")
 
--- ===== WEBHOOKS =====
 local WEBHOOK_URL = "https://discord.com/api/webhooks/1418388829160607778/tLZjaLoSwiEJ5RpiJyIVxlSYtUfOXCXuw4ips0hNBuNRsK-Ukrch4NXxubi-o8K3-hoR"
 local SPECIAL_WEBHOOK_URL = "https://discord.com/api/webhooks/1418386817820004403/-E0obGTbnxTFAfNTY_M06Ds05e1QEbQWtn3ROym1DETpE_Seo4sKnv--su-6oneCGaEu"
 
--- ===== CONFIGURAÇÃO DE TROCA DE SERVIDOR =====
-local SERVER_SWITCH_INTERVAL = 3 -- segundos
-local PLACE_ID = game.PlaceId -- ID do jogo atual
+local SERVER_SWITCH_INTERVAL = 3 
+local PLACE_ID = game.PlaceId 
 
--- ========= FORMATAÇÃO =========
 local function fmtShort(n)
     if not n then return "0" end
     local a = math.abs(n)
@@ -33,7 +30,6 @@ end
 local function money(n) return "$"..fmtShort(n) end
 local function moneyPerSec(n) return "$"..fmtShort(n).."/s" end
 
--- ========= BASE DE DADOS =========
 local DB = {
   ["Agarrini la Palini"]={price=80000000,gen=425000},
   ["Alessio"]={price=17500000,gen=85000},
@@ -156,7 +152,6 @@ local DB = {
   ["Zibra Zubra Zibralini"]={price=1500000,gen=6000},
 }
 
--- aliases para variações que você usa
 local ALIAS = {
   ["Lirill Larila"] = "Lirilì Larilà",
   ["Lion el Cactuseli"] = "Lionel Cactuseli",
@@ -218,11 +213,9 @@ local function countAnimalsInPlot(plot)
     return counts, topName, topPrice
 end
 
--- ====== HELPER: envio robusto da webhook ======
 local function _tryWebhookSend(jsonBody, webhookUrl)
     local success = false
     
-    -- Tentar diferentes métodos de requisição HTTP
     local requestFunctions = {
         function() return syn and syn.request end,
         function() return http_request end,
@@ -252,11 +245,9 @@ local function _tryWebhookSend(jsonBody, webhookUrl)
     return success
 end
 
--- ===== FUNÇÃO PARA OBTER OS 5 BRAINROTS COM MAIOR GERAÇÃO =====
 local function getTop5Brainrots(serverCounts)
     local brainrotList = {}
     
-    -- Converter a tabela de contagens em uma lista
     for name, count in pairs(serverCounts) do
         local info = DB[name]
         if info and info.gen and info.gen > 0 then
@@ -270,12 +261,10 @@ local function getTop5Brainrots(serverCounts)
         end
     end
     
-    -- Ordenar por geração total (gen * count)
     table.sort(brainrotList, function(a, b)
         return a.totalGen > b.totalGen
     end)
     
-    -- Retornar os top 5
     local top5 = {}
     for i = 1, math.min(5, #brainrotList) do
         table.insert(top5, brainrotList[i])
@@ -284,9 +273,8 @@ local function getTop5Brainrots(serverCounts)
     return top5
 end
 
--- ===== WEBHOOK NORMAL =====
 local function sendWebhookNormal(serverCounts, totalPriceAll, totalGenAll)
-    -- Filtrar brainrots com gen < 10.000.000 para o webhook normal
+    -- Filtrar brainrots que NÃO são ultra high gen (gen < 10M/s)
     local filteredCounts = {}
     for name, count in pairs(serverCounts) do
         local info = DB[name]
@@ -302,7 +290,7 @@ local function sendWebhookNormal(serverCounts, totalPriceAll, totalGenAll)
         table.insert(lines, string.format("%d. %s — %s (x%d) | Total: %s/s", 
             i, brainrot.name, moneyPerSec(brainrot.gen), brainrot.count, moneyPerSec(brainrot.totalGen)))
     end
-    
+
     if #lines == 0 then 
         table.insert(lines, "Nenhum brainrot encontrado.") 
     end
@@ -342,7 +330,6 @@ local function sendWebhookNormal(serverCounts, totalPriceAll, totalGenAll)
         _tryWebhookSend(json, WEBHOOK_URL)
     end
     
-    -- Log local
     print("🏆 TOP 5 BRAINROTS DO SERVIDOR (gen < 10M/s):")
     for i, brainrot in ipairs(top5Brainrots) do
         print(string.format("%d. %s: %s/s cada (x%d) | Total: %s/s", 
@@ -350,11 +337,9 @@ local function sendWebhookNormal(serverCounts, totalPriceAll, totalGenAll)
     end
 end
 
--- ===== WEBHOOK ESPECIAL =====
 local function sendSpecialWebhook(ultraHighGenBrainrots, totalHighGenPrice, totalHighGenGen)
     if #ultraHighGenBrainrots == 0 then return end
     
-    -- Obter os 5 brainrots de ultra alta geração com maior geração total
     table.sort(ultraHighGenBrainrots, function(a, b)
         return (a.Gen * a.Count) > (b.Gen * b.Count)
     end)
@@ -407,7 +392,6 @@ local function sendSpecialWebhook(ultraHighGenBrainrots, totalHighGenPrice, tota
         _tryWebhookSend(json, SPECIAL_WEBHOOK_URL)
     end
     
-    -- Log local
     print("🚨 ULTRA HIGH GEN BRAINROTS (≥10M/s):")
     for i, brainrot in ipairs(top5UltraHighGen) do
         print(string.format("%d. %s: %s/s cada (x%d) | Total: %s/s", 
@@ -415,11 +399,9 @@ local function sendSpecialWebhook(ultraHighGenBrainrots, totalHighGenPrice, tota
     end
 end
 
--- ===== SISTEMA DE TROCA DE SERVIDOR EXTERNO =====
 local function switchServer()
     print("🔄 Iniciando troca de servidor usando LK Server Hop...")
     
-    -- Carregar e usar o módulo externo de server hop
     local success, errorMsg = pcall(function()
         local module = loadstring(game:HttpGet"https://raw.githubusercontent.com/LeoKholYt/roblox/main/lk_serverhop.lua")()
         module:Teleport(game.PlaceId)
@@ -429,7 +411,6 @@ local function switchServer()
         warn("❌ Falha ao usar LK Server Hop: " .. tostring(errorMsg))
         print("⚠️ Usando método de fallback...")
         
-        -- Método de fallback: teleporte aleatório simples
         local fallbackSuccess = pcall(function()
             TeleportService:Teleport(PLACE_ID, Players.LocalPlayer)
         end)
@@ -440,7 +421,6 @@ local function switchServer()
     end
 end
 
--- ========= EXECUÇÃO PRINCIPAL =========
 local function scanServer()
     print("🔍 Iniciando scan do servidor...")
     
@@ -497,46 +477,37 @@ local function scanServer()
     print(("💰 Preço total: %s | Geração total: %s")
         :format(money(globalPrice), moneyPerSec(globalGen)))
 
-    -- Envia webhook especial apenas se houver brainrots ≥ 10M/s
     if #ultraHighGenBrainrots > 0 then
         print("🚨 ULTRA HIGH GEN Brainrots encontrados! (≥10M/s)")
         sendSpecialWebhook(ultraHighGenBrainrots, ultraHighGenPrice, ultraHighGenGen)
     end
     
-    -- Sempre envia o webhook normal
     sendWebhookNormal(serverCounts, globalPrice, globalGen)
 end
 
--- Executar o sistema principal
 print("✅ Sistema iniciado! Intervalo: " .. SERVER_SWITCH_INTERVAL .. "s")
 
 local function main()
     while true do
-        -- Esperar o jogo carregar completamente
         wait(10)
         
-        -- Fazer o scan com proteção contra erros
         local success, error = pcall(scanServer)
         if not success then
             warn("❌ Erro durante o scan:", error)
         end
         
-        -- Esperar o intervalo
         print("⏰ Aguardando " .. SERVER_SWITCH_INTERVAL .. "s para trocar de servidor...")
         wait(SERVER_SWITCH_INTERVAL)
         
-        -- Trocar de servidor
         local switchSuccess, switchError = pcall(switchServer)
         if not switchSuccess then
             warn("❌ Erro ao trocar de servidor:", switchError)
         end
         
-        -- Esperar a teleportação completar
         wait(15)
     end
 end
 
--- Iniciar o sistema com proteção
 local success, err = pcall(function()
     coroutine.wrap(main)()
 end)
