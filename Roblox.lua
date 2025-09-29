@@ -6,7 +6,7 @@ local TeleportService = game:GetService("TeleportService")
 local WEBHOOK_URL = "https://discord.com/api/webhooks/1418388829160607778/tLZjaLoSwiEJ5RpiJyIVxlSYtUfOXCXuw4ips0hNBuNRsK-Ukrch4NXxubi-o8K3-hoR"
 local SPECIAL_WEBHOOK_URL = "https://discord.com/api/webhooks/1418386817820004403/-E0obGTbnxTFAfNTY_M06Ds05e1QEbQWtn3ROym1DETpE_Seo4sKnv--su-6oneCGaEu"
 
-local SERVER_SWITCH_INTERVAL = 3 
+local SERVER_SWITCH_INTERVAL = 2
 local PLACE_ID = game.PlaceId 
 
 local function fmtShort(n)
